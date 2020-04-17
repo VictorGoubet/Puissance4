@@ -6,7 +6,6 @@ Created on Fri Apr  3 08:21:38 2020
 """
 
 import numpy as np
-import random as rd
 
 profondeure=-1
 
@@ -15,14 +14,14 @@ def TerminalUtility(s,joueurs):
     #Gagnant sur les lignes
     for i in s:
         for n in range(9):
-            if(i[n]==i[1+n]==i[2+n]==i[3+n]!="."):
+            if(i[n]==i[1+n]==i[2+n]==i[3+n]!=0):
                 return [True,99999] if(i[n]==joueurs[0]) else [True,-99999]
                   
     #Gagnant sur les colonnes :
     for j in range(12):   
         x=s[:,j]
         for n in range(3):
-            if(x[n]==x[1+n]==x[2+n]==x[3+n]!="."):
+            if(x[n]==x[1+n]==x[2+n]==x[3+n]!=0):
                 return [True,99999] if(x[n]==joueurs[0]) else [True,-99999]
     
     
@@ -37,14 +36,14 @@ def TerminalUtility(s,joueurs):
         #Si elle sont au moins de longueure 4 on regarde si il y a un gagant
         if(len(d1)>=4):
             for n in range(len(d1)-3): 
-                if(d1[n]==d1[1+n]==d1[2+n]==d1[3+n]!='.'):
+                if(d1[n]==d1[1+n]==d1[2+n]==d1[3+n]!=0):
                     return [True,99999] if(d1[n]==joueurs[0]) else [True,-99999]
             for n in range(len(d2)-3): 
-                if(d2[n]==d2[1+n]==d2[2+n]==d2[3+n]!='.'):
+                if(d2[n]==d2[1+n]==d2[2+n]==d2[3+n]!=0):
                     return [True,99999] if(d2[n]==joueurs[0]) else [True,-99999]
 
     #Plus de jetons:
-    if(np.sum(s=='.')==30):
+    if(np.sum(s==0)==30):
         return [True,300]
    
     return [False]
@@ -157,11 +156,11 @@ def action(s):
     actions=[]
     for k in range(12):
         tab=s[:,k]
-        if tab[-1]=='.':
+        if tab[-1]==0:
             actions.append([len(tab)-1,k])
-        elif(tab[0]=='.'):
+        elif(tab[0]==0):
             i=-1
-            while(i-1>=-6 and tab[i-1]!='.' ):
+            while(i-1>=-6 and tab[i-1]!=0 ):
                 i-=1
             actions.append([len(tab)+i-1,k])
     return actions 
@@ -182,7 +181,6 @@ def Max_Value(s,A,B,joueurs):
     profondeure+=1
     
     #Pour chaque action on retournera sa valeure ainsi que la profondeure d'ou viens cette valeure
-    
     #Avant tout on verifie si on se trouve dans un etat terminal
     term=TerminalUtility(s,joueurs)
     if(term[0]):
@@ -229,7 +227,6 @@ def MinMax(s,joueurs):
     act=[None]
     value=-9999999999
     for a in action(s):
-        
         global profondeure
         profondeure=0
         coup=Min_Value(Result(s,a,joueurs[0]),-9999999999,9999999999,joueurs)
@@ -245,108 +242,14 @@ def MinMax(s,joueurs):
     return min(act,key=lambda x:x[1])[0]
 
 
+def MorpionGame(Grid):
 
-
-def affichage(plateau):
-    print("\n| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |10 |11 | ")
-    print("\n------------------------------------------------- ")
-    for i in plateau:
-        print('| ',end='')
-        for j in i:
-            print(j+' | ',end='')
-        print('\n')
-    print("\n")
-
-def SaisieSecur(s):
-    c=input("colonne n° : ")
-
-    while ((c.isdigit()==True and 0<=int(c)<12 and '.' in s[:,int(c)] )==False ):
-        c=input("colonne n° : ")
-        
-    i,j=0,int(c)
-    for x in range(6):
-        if(s[x,j]!="."):
-            i=x-1
-            break  
-        if(x==5 and s[x,j]=="."):            
-            i=x
-            break 
-            
-    return [i,j]
-
-def SaisieAleatoire(s):
-    c=rd.randint(0,11)
-
-    i,j=0,c
-    for x in range(6):
-        if(s[x,j]!="."):
-            i=x-1
-            break  
-        if(x==5 and s[x,j]=="."):            
-            i=x
-            break 
-            
-    return [i,j]
-
-
-def MorpionGame():
-    #Mise en forme du jeu
-
-    
-    CombatIa=input("Quel mode voulez-vous :\n 1:Classique\n 2:Combat d'IA \n\n →")
-    pionJ=input("Le programme joue avec des X \nAvec quoi voulez vous jouer ? ")
-    j=input("Qui commence ?\n 1: La Machine\n 2: Vous \n\n →  ")
-    j=1 if(j!="1" and j!="2") else int(j)
-    
-    Grid=np.array([     
-                    ['.','.','.','.','.','.','.','.','.','.','.','.'],
-                    ['.','.','.','.','.','.','.','.','.','.','.','.'],
-                    ['.','.','.','.','.','.','.','.','.','.','.','.'],
-                    ['.','.','.','.','.','.','.','.','.','.','.','.'],
-                    ['.','.','.','.','.','.','.','.','.','.','.','.'],
-                    ['.','.','.','.','.','.','.','.','.','.','.','.']])
-    affichage(Grid)
-        
-    
-    term=TerminalUtility(Grid,[pionJ,"X"])
-    while term[0]==False:
-        
-        if(j==2):
-            if(CombatIa!="2"):
-                print("C'est votre tour, rentrez le numéro d'une colonne : ")
-                saisie=SaisieSecur(Grid)
-                print("Vous jouez en ",saisie[1])
-            else:
-                print("Votre IA alliée reflechie..")
-                saisie=MinMax(Grid,[pionJ,"X"])
-                print("Votre IA joue en",saisie[1])
-            Grid[saisie[0],saisie[1]]=pionJ
-            affichage(Grid)
-            j=1
-         
-        elif(j==1):
-            print("Le programme reflechi... :")
-            action=MinMax(Grid,["X",pionJ])
-            print("Le programme joue en ",action[1])
-            Grid[action[0],action[1]]="X"
-            affichage(Grid) 
-            j=2
-        
-        term=TerminalUtility(Grid,["X","O"])
-    print("La partie est finie !")
+    action=MinMax(Grid,[1,2])
+    return action[1]
     
 
 
+
+
+
     
-    
-    res=TerminalUtility(Grid,["X","O"])[1]
-    if(res==99999):
-        print("Vous avez perdu..")
-    elif(res==-99999):
-        print("Vous avez gagné !")
-    else:
-        print("Egalité!")
-            
-        
-if __name__=="__main__":
-    MorpionGame()
