@@ -100,7 +100,7 @@ grille=np.zeros((grilleDim,grilleDim),dtype=np.byte)
 
 
 #idjeu est un id unique, si vous abondonnez une partie, pensez à créer un nouveau idjeu
-idjeu="ID1504_001_2"
+idjeu="goubet"
 idjoueurLocal="Safwan"
 idjoueurDistant="Christophe"
 
