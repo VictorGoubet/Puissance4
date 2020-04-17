@@ -9,6 +9,7 @@ Created on Thu Apr  2 01:41:59 2020
 import http.client
 import time
 import numpy as np
+from Puisance4x12x6_Implementable_bis import 
 
 CRED = '\33[31m'
 CEND = '\033[0m'
@@ -110,6 +111,7 @@ joueurLocalquiCommence=True
 
 #cette methode est à remplacer par votre une fonction IA qui propose le jeu
 def monjeu():
+
     return int(input("vueillez saisir la colonne de votre jeu entre 0 et "+ str(grilleDim-1) +" : "))
 
 
