@@ -100,12 +100,12 @@ grille=np.zeros((grilleDim,grilleDim),dtype=np.byte)
 
 
 #idjeu est un id unique, si vous abondonnez une partie, pensez à créer un nouveau idjeu
-idjeu="goubet"
-idjoueurLocal="Safwan"
-idjoueurDistant="Christophe"
+idjeu="sdfg"
+idjoueurLocal="p2"
+idjoueurDistant="p1"
 
 # bien préviser si vous commencer le jeu ou c'est l'adversaire qui commence
-joueurLocalquiCommence=True
+joueurLocalquiCommence=False
 
 
 
