@@ -148,6 +148,7 @@ def heuristique(s,joueurs):
         #On evalue le score de la grille pour l'adversaire
         score-=coefDefense*EvalAction(a,[joueurs[1],joueurs[0]])
 
+    print(score)
     return score
         
 
