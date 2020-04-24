@@ -30,21 +30,24 @@ def TerminalUtility(s,joueurs):
     #on retourne les colonnes pour avoir les diagonales inverses
     s2=np.array([np.flip(s[i]) for i in range(len(s))])
     
-    for k in range(-len(s)+1,len(s[0,:])):
+    for k in range(-2,9):
         #On ajoutes la diagonale exentré de k et la diagonale inverse
         d1=s.diagonal(k)
         d2=np.flip(s2.diagonal(k)) 
-        #Si elle sont au moins de longueure 4 on regarde si il y a un gagant
-        if(len(d1)>=4):
-            for n in range(len(d1)-3): 
-                if(d1[n]==d1[1+n]==d1[2+n]==d1[3+n]!='.'):
-                    return [True,99999] if(d1[n]==joueurs[0]) else [True,-99999]
-            for n in range(len(d2)-3): 
-                if(d2[n]==d2[1+n]==d2[2+n]==d2[3+n]!='.'):
-                    return [True,99999] if(d2[n]==joueurs[0]) else [True,-99999]
+
+        #On regarde si il y a un gagnant
+        for n in range(len(d1)-3): 
+            if(d1[n]==d1[1+n]==d1[2+n]==d1[3+n]!='.'):
+                return [True,99999] if(d1[n]==joueurs[0]) else [True,-99999]
+            
+            if(d2[n]==d2[1+n]==d2[2+n]==d2[3+n]!='.'):
+                return [True,99999] if(d2[n]==joueurs[0]) else [True,-99999]
+
+            
+            
 
     #Plus de jetons:
-    if(np.sum(s=='.')==30):
+    if(np.sum(s=='.')==42):
         return [True,300]
    
     return [False]
@@ -63,41 +66,51 @@ def heuristique(s,joueurs):
         tab2=tab2=LCD[:index] if(index<4) else LCD[index-3:index]  
                  
         tab = np.concatenate([tab2,tab1])
-            
         #Ensuite on compte le nb de possibilité de gagner 
-        nbPossibilite,nbPionsTot=0,0
+        nbPossibiliteLocal,nbPionsTotLocal=0,0
+        nbPossibiliteAdversaire,nbPionsTotAdversaire=0,0
                
-        for k in range(len(tab)-4):
+        for k in range(len(tab)-3):
+            
             if(joueurs[1] not in tab[k:4+k]):
-                nbPossibilite+=1
-                nbPionsTot+=np.sum(tab[k:4+k]==joueurs[0])
-
-        return [nbPossibilite,nbPionsTot]
+                nbPossibiliteLocal+=1
+                nbPionsTotLocal+=np.sum(tab[k:4+k]==joueurs[0])
+            
+            if(joueurs[0] not in tab[k:4+k]):
+                nbPossibiliteAdversaire+=1
+                nbPionsTotAdversaire+=np.sum(tab[k:4+k]==joueurs[1])
+                
+        return nbPossibiliteLocal,nbPionsTotLocal,nbPossibiliteAdversaire,nbPionsTotAdversaire
     
     
     def EvalAction(a,joueurs):
             
         #On evalue une action part sont potentiel sur les lignes colonnes et diagos
-        fitness=0
-        
+        fitnessLocal,fitnessAdversaire=0,0
+
         #Evaluation de la ligne
-        fitness1=0
+        fitness1Local,fitness1Aversaire=0,0
         info=EvalLCD(s[a[0]],a[1],joueurs)
         if(info[0]>0):
-            fitness1+=info[0]**2+info[1]**3
+            fitness1Local+=info[0]**2+info[1]**3
+        if(info[2]>0):
+            fitness1Aversaire+=info[2]**2+info[3]**3
     
             
         #Evaluation de la colonne
-        fitness2=0
+        fitness2Local,fitness2Aversaire=0,0
         info=EvalLCD(s[:,a[1]],a[0],joueurs)
         if(info[0]>0):
-            fitness2+=info[0]**2+info[1]**3
+            fitness2Local+=info[0]**2+info[1]**3
+        if(info[2]>0):
+            fitness2Aversaire+=info[2]**2+info[3]**3
     
     
 
-        #On récupére les deux diagonales concernées:
-        fitness3=0
+        #On s'occupe des diagonales :
+        fitness3Local,fitness3Aversaire=0,0
         
+        #On récupére les deux diagonales concernées:
         d1=[]
         i,j=a
         while(0<i and 0<j):
@@ -117,38 +130,43 @@ def heuristique(s,joueurs):
             i,j=i-1,j+1
             
         #Evaluation des deux diagonales :
-        fitness31=0
-        info=EvalLCD(d1,a[0]-x1[0],joueurs)
-        if(info[0]>0):
-            fitness31+=info[0]**2+info[1]**3
-    
-        fitness32=0
-        info=EvalLCD(d2,x2[0]-a[0],joueurs)
-        if(info[0]>0): 
-            fitness32+=info[0]**2+info[1]**3
+        fitness31Local,fitness31Adversaire=0,0     
+        if(len(d1)>3):
+            info=EvalLCD(d1,a[0]-x1[0],joueurs)
+            if(info[0]>0):
+                fitness31Local+=info[0]**2+info[1]**3
+            if(info[2]>0):
+                fitness31Adversaire+=info[2]**2+info[3]**3
+        
+        fitness32Local,fitness32Adversaire=0,0
+        if(len(d2)>3):
+            info=EvalLCD(d2,x2[0]-a[0],joueurs)
+            if(info[0]>0): 
+                fitness32Local+=info[0]**2+info[1]**3
+            if(info[2]>0): 
+                fitness32Adversaire+=info[2]**2+info[3]**3
                 
-        fitness3=fitness31+fitness32 
-            
-        #On favorise légerement les colonnes car il est plus probable que
-        #les pions à placer ne sois pas dans le vide
-        #On ajoute également un poid pour favoriser une attaque sur les diagnale
-        #En effet ce genre d'attaque est moin prévisible pour l'adversaire
-        fitness=fitness1+1.1*fitness2+1.5*fitness3
+        fitness3Local=fitness31Local+fitness32Local 
+        fitness3Aversaire=fitness31Adversaire+fitness32Adversaire
+        
 
-        return fitness
+        fitnessLocal=fitness1Local+fitness2Local+fitness3Local
+        fitnessAdversaire=fitness1Aversaire+fitness2Aversaire+fitness3Aversaire
+        
+        return fitnessLocal,fitnessAdversaire
 
     #Ici on favorise l'attaque plutot que la défense
     score=0
     coefAttaque=1.5
     coefDefense=1
-    
     for a in action(s):
+        fitnessS=EvalAction(a,joueurs)
         #On evalue le score de la grille pour le programme (domicile):
-        score+=coefAttaque*EvalAction(a,joueurs)
+        score+=coefAttaque*fitnessS[0]  
         #On evalue le score de la grille pour l'adversaire
-        score-=coefDefense*EvalAction(a,[joueurs[1],joueurs[0]])
+        score-=coefDefense*fitnessS[1]
 
-    print(score)
+    
     return score
         
 
