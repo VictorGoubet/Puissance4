@@ -9,6 +9,7 @@ import numpy as np
 import random as rd
 
 profondeure=-1
+profondeureMax=3
 
 def TerminalUtility(s,joueurs):
     
@@ -47,8 +48,8 @@ def TerminalUtility(s,joueurs):
             
 
     #Plus de jetons:
-    if(np.sum(s=='.')==42):
-        return [True,300]
+    if(np.sum(s=='.')==30):
+        return [True,0]
    
     return [False]
             
@@ -57,6 +58,27 @@ def TerminalUtility(s,joueurs):
 
 
 def heuristique(s,joueurs):
+    
+    def checkLCD(tab,jL,jA):
+        resLocal=[True,0]
+        resAdversaire=[True,0]
+        
+        for k in tab:
+            if(k==jA):
+                resLocal[0]=False
+                resAdversaire[1]+=1
+                if(resAdversaire[0]==False):
+                    break
+            elif(k==jL):
+                
+                resAdversaire[0]=False
+                resLocal[1]+=1
+                if(resLocal[0]==False):
+                    break
+            
+            
+                
+        return resLocal,resAdversaire
     
     def EvalLCD(LCD,index,joueurs):
         #On évalue le potentiel d'un Ligne Colonne ou Diagonale:
@@ -67,20 +89,20 @@ def heuristique(s,joueurs):
                  
         tab = np.concatenate([tab2,tab1])
         #Ensuite on compte le nb de possibilité de gagner 
-        nbPossibiliteLocal,nbPionsTotLocal=0,0
-        nbPossibiliteAdversaire,nbPionsTotAdversaire=0,0
-               
+        fitnessLocal,fitnessAdversaire=0,0
+          
         for k in range(len(tab)-3):
+
+            check=checkLCD(tab[k:4+k],joueurs[0],joueurs[1])
             
-            if(joueurs[1] not in tab[k:4+k]):
-                nbPossibiliteLocal+=1
-                nbPionsTotLocal+=np.sum(tab[k:4+k]==joueurs[0])
-            
-            if(joueurs[0] not in tab[k:4+k]):
-                nbPossibiliteAdversaire+=1
-                nbPionsTotAdversaire+=np.sum(tab[k:4+k]==joueurs[1])
+            if(check[0][0]):
+                fitnessLocal+=4**check[0][1]
                 
-        return nbPossibiliteLocal,nbPionsTotLocal,nbPossibiliteAdversaire,nbPionsTotAdversaire
+            if(check[1][0]):
+                fitnessAdversaire+=3**check[1][1]
+            
+                
+        return fitnessLocal,fitnessAdversaire
     
     
     def EvalAction(a,joueurs):
@@ -89,27 +111,15 @@ def heuristique(s,joueurs):
         fitnessLocal,fitnessAdversaire=0,0
 
         #Evaluation de la ligne
-        fitness1Local,fitness1Aversaire=0,0
         info=EvalLCD(s[a[0]],a[1],joueurs)
-        if(info[0]>0):
-            fitness1Local+=info[0]**2+info[1]**3
-        if(info[2]>0):
-            fitness1Aversaire+=info[2]**2+info[3]**3
-    
-            
+        fitness1Local,fitness1Aversaire=info
+        
         #Evaluation de la colonne
-        fitness2Local,fitness2Aversaire=0,0
         info=EvalLCD(s[:,a[1]],a[0],joueurs)
-        if(info[0]>0):
-            fitness2Local+=info[0]**2+info[1]**3
-        if(info[2]>0):
-            fitness2Aversaire+=info[2]**2+info[3]**3
-    
-    
+        fitness2Local,fitness2Aversaire=info
+
 
         #On s'occupe des diagonales :
-        fitness3Local,fitness3Aversaire=0,0
-        
         #On récupére les deux diagonales concernées:
         d1=[]
         i,j=a
@@ -130,26 +140,21 @@ def heuristique(s,joueurs):
             i,j=i-1,j+1
             
         #Evaluation des deux diagonales :
+        fitness3Local,fitness3Aversaire=0,0
+        
         fitness31Local,fitness31Adversaire=0,0     
         if(len(d1)>3):
             info=EvalLCD(d1,a[0]-x1[0],joueurs)
-            if(info[0]>0):
-                fitness31Local+=info[0]**2+info[1]**3
-            if(info[2]>0):
-                fitness31Adversaire+=info[2]**2+info[3]**3
+            fitness31Local,fitness31Adversaire=info
         
         fitness32Local,fitness32Adversaire=0,0
         if(len(d2)>3):
             info=EvalLCD(d2,x2[0]-a[0],joueurs)
-            if(info[0]>0): 
-                fitness32Local+=info[0]**2+info[1]**3
-            if(info[2]>0): 
-                fitness32Adversaire+=info[2]**2+info[3]**3
+            fitness32Local,fitness32Adversaire=info
                 
         fitness3Local=fitness31Local+fitness32Local 
         fitness3Aversaire=fitness31Adversaire+fitness32Adversaire
         
-
         fitnessLocal=fitness1Local+fitness2Local+fitness3Local
         fitnessAdversaire=fitness1Aversaire+fitness2Aversaire+fitness3Aversaire
         
@@ -157,7 +162,7 @@ def heuristique(s,joueurs):
 
     #Ici on favorise l'attaque plutot que la défense
     score=0
-    coefAttaque=1.5
+    coefAttaque=1.6
     coefDefense=1
     for a in action(s):
         fitnessS=EvalAction(a,joueurs)
@@ -197,7 +202,7 @@ def Result(s,a,j):
 
 def Max_Value(s,A,B,joueurs):
     #A chaque descente en profondeure on met à jour la variable
-    global profondeure
+    global profondeure,profondeureMax
     profondeure+=1
     
     #Pour chaque action on retournera sa valeure ainsi que la profondeure d'ou viens cette valeure
@@ -206,7 +211,7 @@ def Max_Value(s,A,B,joueurs):
     term=TerminalUtility(s,joueurs)
     if(term[0]):
         return [term[1],profondeure]
-    elif(profondeure>3):
+    elif(profondeure>profondeureMax):
         return [heuristique(s,joueurs),profondeure]
     else:
         #On appel récursivement avec coupure Beta
@@ -222,13 +227,13 @@ def Max_Value(s,A,B,joueurs):
         return v
 
 def Min_Value(s,A,B,joueurs):
-    global profondeure
+    global profondeure,profondeureMax
     profondeure+=1
     
     term=TerminalUtility(s,joueurs)
     if(term[0]):
         return [term[1],profondeure]
-    elif(profondeure>3):
+    elif(profondeure>profondeureMax):
         return [heuristique(s,joueurs),profondeure]
     else:
         #On appel récursivement avec coupure Beta
