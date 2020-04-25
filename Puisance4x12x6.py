@@ -21,14 +21,14 @@ def TerminalUtility(s,joueurs):
     for i in s:
         for n in range(9):
             if(i[n]==i[1+n]==i[2+n]==i[3+n]!="."):
-                return [True,1000] if(i[n]==joueurs[0]) else [True,-1000]
+                return [True,99999] if(i[n]==joueurs[0]) else [True,-99999]
                   
     #Gagnant sur les colonnes :
     for j in range(12):   
         x=s[:,j]
         for n in range(3):
             if(x[n]==x[1+n]==x[2+n]==x[3+n]!="."):
-                return [True,1000] if(x[n]==joueurs[0]) else [True,-1000]
+                return [True,99999] if(x[n]==joueurs[0]) else [True,-99999]
     
     
     #Gagnant sur les diagonales :
@@ -43,17 +43,18 @@ def TerminalUtility(s,joueurs):
         #On regarde si il y a un gagnant sur une de ces deux diagonales :
         for n in range(len(d1)-3): 
             if(d1[n]==d1[1+n]==d1[2+n]==d1[3+n]!='.'):
-                return [True,1000] if(d1[n]==joueurs[0]) else [True,-1000]
+                return [True,99999] if(d1[n]==joueurs[0]) else [True,-99999]
             
             if(d2[n]==d2[1+n]==d2[2+n]==d2[3+n]!='.'):
-                return [True,1000] if(d2[n]==joueurs[0]) else [True,-1000]
+                return [True,99999] if(d2[n]==joueurs[0]) else [True,-99999]
 
             
             
 
     #Plus de jetons:
-    if(np.sum(s=='.')==0):
-        return [True,0]
+    nbP=np.sum(s=='.')
+    if(nbP==30):
+        return [True,500]
    
     return [False]
             
@@ -226,7 +227,7 @@ def Max_Value(s,A,B,joueurs):
     else:
         #Pour chaque action on retournera sa valeure ainsi que la profondeure 
         #d'ou viens cette valeure
-        v=[-999999,profondeure]
+        v=[-9999999,profondeure]
         for a in action(s):
             mnV=Min_Value(Result(s,a,joueurs[0]),A,B,joueurs)
             v=[max(v[0],mnV[0]),mnV[1]]
@@ -249,7 +250,7 @@ def Min_Value(s,A,B,joueurs):
     elif(profondeure>profondeureMax):
         return [heuristique(s,joueurs),profondeure]
     else:
-        v=[999999,profondeure]
+        v=[9999999,profondeure]
         for a in action(s):
             mxV=Max_Value(Result(s,a,joueurs[1]),A,B,joueurs)
             v=[min(v[0],mxV[0]),mxV[1]]
@@ -264,7 +265,7 @@ def Min_Value(s,A,B,joueurs):
 def MinMax(s,joueurs):
     global profondeure
     act=[None]
-    value=-999999
+    value=-9999999
     
     #On va prendre l'action avec la valeure maximale
     #Cependant si on a plusieurs actions avec la même valeure on prend celle
@@ -272,7 +273,7 @@ def MinMax(s,joueurs):
     for a in action(s):
         
         profondeure=0
-        coup=Min_Value(Result(s,a,joueurs[0]),-999999,999999,joueurs)
+        coup=Min_Value(Result(s,a,joueurs[0]),-9999999,9999999,joueurs)
         res=coup[0]
         profondeureCoup=coup[1]
         if(res>value):
@@ -381,9 +382,9 @@ def MorpionGame():
     
     
     res=TerminalUtility(Grid,["X",pionJ])[1]
-    if(res==1000):
+    if(res==99999):
         print("Vous avez perdu..")
-    elif(res==-1000):
+    elif(res==-99999):
         print("Vous avez gagné !")
     else:
         print("Egalité!")
