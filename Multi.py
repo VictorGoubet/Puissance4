@@ -9,7 +9,7 @@ Created on Thu Apr  2 01:41:59 2020
 import http.client
 import time
 import numpy as np
-from Puisance4x12x6_Implementable import MinMax
+from Puissance4x12x6 import MinMax
 
 CRED = '\33[31m'
 CEND = '\033[0m'
@@ -100,12 +100,12 @@ grille=np.zeros((grilleDim,grilleDim),dtype=np.byte)
 
 
 #idjeu est un id unique, si vous abondonnez une partie, pensez à créer un nouveau idjeu
-idjeu="ID1504_001_2345"
-idjoueurLocal="Victor"
-idjoueurDistant="Bruce"
+idjeu="ID1504_001_2"
+idjoueurLocal="Safwan"
+idjoueurDistant="Christophe"
 
 # bien préviser si vous commencer le jeu ou c'est l'adversaire qui commence
-joueurLocalquiCommence=False
+joueurLocalquiCommence=True
 
 
 
@@ -113,7 +113,6 @@ joueurLocalquiCommence=False
 def monjeu():
     action=MinMax(grille,[joueurLocal,joueurDistant])
     return action[1]
-
 
 
 # cette fonction est à remplacer une qui saisie le jeu de l'adversaire à votre IA
