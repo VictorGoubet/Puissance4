@@ -254,8 +254,7 @@ def Max_Value(s,A,B,joueurs):
             mnV=Min_Value(Result(s,a,joueurs[0]),A,B,joueurs)
             v=[max(v[0],mnV[0]),mnV[1]]
             profondeure-=1  
-            if v[0]>=B:
-                return v
+            if v[0]>=B:return v
             A=max(A,v[0])
                     
         return v
@@ -277,8 +276,7 @@ def Min_Value(s,A,B,joueurs):
             mxV=Max_Value(Result(s,a,joueurs[1]),A,B,joueurs)
             v=[min(v[0],mxV[0]),mxV[1]]
             profondeure-=1
-            if v[0]<=A:
-                return v
+            if v[0]<=A:return v
             B=min(B,v[0])
         return v
             
