@@ -7,10 +7,28 @@ Created on Fri Apr  3 08:21:38 2020
 
 import numpy as np
 import random as rd
+import time
 
 #On définit la profondeure max et initial :
 profondeure=-1
 profondeureMax=3
+
+CRED = '\33[41m'
+CBLUE   = '\33[44m'
+CYEL   = '\33[36m'
+CEND = '\033[0m'
+
+#renvoie la diagonale gauche et droite exentré de k 
+def diag(s,k):
+    d1,d2=[],[]
+    i,j= (0,k) if(k>0) else (-k,0)
+    while(i and j >0):
+        i,j=i-1,j-1 
+    while(i<len(s) and j<len(s[0])):
+        d1.append(s[i,j])
+        d2.append(s[i,len(s[0])-j-1])
+        i,j=i+1,j+1
+    return d1,d2
 
 
 #Ici pour le puissance 4 on peut définirt Terminale et Utility dans une même fonction :
@@ -32,14 +50,10 @@ def TerminalUtility(s,joueurs):
     
     
     #Gagnant sur les diagonales :
-    #On créé une copie de la matrice retournée afin d'obtenir plus facilement les diagonales
-    s2=np.array([np.flip(s[i]) for i in range(len(s))])
     
     #Pour chaque diagonale exentrée de k :
     for k in range(-2,9):
-        d1=s.diagonal(k)
-        d2=np.flip(s2.diagonal(k)) 
-
+        d1,d2=diag(s,k)
         #On regarde si il y a un gagnant sur une de ces deux diagonales :
         for n in range(len(d1)-3): 
             if(d1[n]==d1[1+n]==d1[2+n]==d1[3+n]!='.'):
@@ -54,7 +68,7 @@ def TerminalUtility(s,joueurs):
     #Plus de jetons:
     nbP=np.sum(s=='.')
     if(nbP==30):
-        return [True,500]
+        return [True,50]
    
     return [False]
             
@@ -118,7 +132,6 @@ def heuristique(s,joueurs):
     def EvalAction(a,joueurs):
             
         #On evalue une action part sont potentiel sur les lignes colonnes et diagos
-        fitnessLocal,fitnessAdversaire=0,0
 
         #Evaluation de la ligne
         info=EvalLCD(s[a[0]],a[1],joueurs)
@@ -133,33 +146,42 @@ def heuristique(s,joueurs):
         #On récupére les deux diagonales concernées:
         d1=[]
         i,j=a
-        while(0<i and 0<j):
+        while(i>=0 and j >=0 ):
+            d1.append(s[i,j])
             i,j=i-1,j-1 
-        x1=i,j
-        while(i<len(s) and j<len(s[0,:])):
+            
+        d1.reverse()
+        i1=len(d1)-1
+        i,j=a[0]+1,a[1]+1
+        
+        while(i<len(s) and j<len(s[0])):
             d1.append(s[i,j])
             i,j=i+1,j+1
               
         d2=[]
         i,j=a
-        while(i<len(s)-1 and 0<j):
+        while(i<len(s) and j>=0):
+            d2.append(s[i,j])
             i,j=i+1,j-1
-        x2=i,j
-        while(0<=i and j<len(s[0,:])):
+            
+        d2.reverse()
+        i2=len(d2)-1
+        i,j=a[0]-1,a[1]+1
+        
+        while(0<=i and j<len(s[0])):
             d2.append(s[i,j])
             i,j=i-1,j+1
             
         #Evaluation des deux diagonales :
-        fitness3Local,fitness3Aversaire=0,0
-        
+       
         fitness31Local,fitness31Adversaire=0,0     
         if(len(d1)>3):
-            info=EvalLCD(d1,a[0]-x1[0],joueurs)
+            info=EvalLCD(d1,i1,joueurs)
             fitness31Local,fitness31Adversaire=info
         
         fitness32Local,fitness32Adversaire=0,0
         if(len(d2)>3):
-            info=EvalLCD(d2,x2[0]-a[0],joueurs)
+            info=EvalLCD(d2,i2,joueurs)
             fitness32Local,fitness32Adversaire=info
                 
         fitness3Local=fitness31Local+fitness32Local 
@@ -212,7 +234,7 @@ def Result(s,a,j):
 
 def Max_Value(s,A,B,joueurs):
     #A chaque descente en profondeure on met à jour la variable
-    global profondeure,profondeureMax
+    global profondeure
     profondeure+=1
     
 
@@ -241,7 +263,7 @@ def Max_Value(s,A,B,joueurs):
 
 def Min_Value(s,A,B,joueurs):
     #Même raisonnement avec qu'avec Max Value
-    global profondeure,profondeureMax
+    global profondeure
     profondeure+=1
     
     term=TerminalUtility(s,joueurs)
@@ -293,7 +315,12 @@ def affichage(plateau):
     for i in plateau:
         print('| ',end='')
         for j in i:
-            print(j+' | ',end='')
+            if(j=='X'):
+                print(CRED+j+CEND+' | ',end='') 
+            elif(j=='.'):
+                print(j+' | ',end='')
+            else:
+                print(CBLUE+j+CEND+' | ',end='')
         print('\n')
     print("\n")
 
@@ -356,20 +383,26 @@ def MorpionGame():
         if(j==2):
             if(CombatIa!="2"):
                 print("C'est votre tour, rentrez le numéro d'une colonne : ")
+                t1=time.time()
                 saisie=SaisieSecur(Grid)
-                print("Vous jouez en ",saisie[1])
+                dt=time.time()-t1
+                print("Vous avez réflechis "+CYEL+str(round(dt,1))+CEND+" sc et jouez en "+CYEL+str(saisie[1])+CEND)
             else:
                 print("Votre IA alliée reflechie..")
+                t1=time.time()
                 saisie=MinMax(Grid,[pionJ,"X"])
-                print("Votre IA joue en",saisie[1])
+                dt=time.time()-t1
+                print("Votre IA a réflechie "+CYEL+str(round(dt,1))+CEND+" sc et joue en "+CYEL+str(saisie[1])+CEND)
             Grid[saisie[0],saisie[1]]=pionJ
             affichage(Grid)
             j=1
          
         elif(j==1):
             print("Le programme reflechi... :")
+            t1=time.time()
             action=MinMax(Grid,["X",pionJ])
-            print("Le programme joue en ",action[1])
+            dt=time.time()-t1
+            print("L'IA adverse a réflechie "+CYEL+str(round(dt,1))+CEND+" sc et joue en "+CYEL+str(action[1])+CEND)
             Grid[action[0],action[1]]="X"
             affichage(Grid) 
             j=2
