@@ -194,7 +194,7 @@ def heuristique(s,joueurs):
 
     #Ici on favorise l'attaque plutot que la défense
     score=0
-    coefAttaque=1.6
+    coefAttaque=1.7
     coefDefense=1
     
     #Pour chaque action on va ajouter sons score Local et soustraire son score adversaire
