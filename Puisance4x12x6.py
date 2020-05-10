@@ -308,7 +308,7 @@ def MinMax(s,joueurs):
 
 def affichage(plateau):
     #On met en forme la grille :
-    print("\n| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |10 |11 | ")
+    print("\n| 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |11 |12 | ")
     print("\n------------------------------------------------- ")
     for i in plateau:
         print('| ',end='')
@@ -326,10 +326,10 @@ def SaisieSecur(s):
     #On gére la saisie afin de ne pas avoir d'erreures :
     c=input("colonne n° : ")
 
-    while ((c.isdigit()==True and 0<=int(c)<12 and '.' in s[:,int(c)] )==False ):
+    while ((c.isdigit()==True and 0<=int(c)-1<12 and '.' in s[:,int(c)-1] )==False ):
         c=input("colonne n° : ")
         
-    i,j=0,int(c)
+    i,j=0,int(c)-1
     for x in range(6):
         if(s[x,j]!="."):
             i=x-1
@@ -384,13 +384,13 @@ def MorpionGame():
                 t1=time.time()
                 saisie=SaisieSecur(Grid)
                 dt=time.time()-t1
-                print("Vous avez réflechis "+CYEL+str(round(dt,1))+CEND+" sc et jouez en "+CYEL+str(saisie[1])+CEND)
+                print("Vous avez réflechis "+CYEL+str(round(dt,1))+CEND+" sc et jouez en "+CYEL+str(saisie[1]+1)+CEND)
             else:
                 print("Votre IA alliée reflechie..")
                 t1=time.time()
                 saisie=MinMax(Grid,[pionJ,"X"])
                 dt=time.time()-t1
-                print("Votre IA a réflechie "+CYEL+str(round(dt,1))+CEND+" sc et joue en "+CYEL+str(saisie[1])+CEND)
+                print("Votre IA a réflechie "+CYEL+str(round(dt,1))+CEND+" sc et joue en "+CYEL+str(saisie[1]+1)+CEND)
             Grid[saisie[0],saisie[1]]=pionJ
             affichage(Grid)
             j=1
@@ -400,7 +400,7 @@ def MorpionGame():
             t1=time.time()
             action=MinMax(Grid,["X",pionJ])
             dt=time.time()-t1
-            print("L'IA adverse a réflechie "+CYEL+str(round(dt,1))+CEND+" sc et joue en "+CYEL+str(action[1])+CEND)
+            print("L'IA adverse a réflechie "+CYEL+str(round(dt,1))+CEND+" sc et joue en "+CYEL+str(action[1]+1)+CEND)
             Grid[action[0],action[1]]="X"
             affichage(Grid) 
             j=2
