@@ -358,7 +358,7 @@ def SaisieAleatoire(s):
 
 def MorpionGame():
     #Mise en forme du jeu
-
+    listeT=[]
     
     CombatIa=input("Quel mode voulez-vous :\n 1:Classique\n 2:Combat d'IA \n\n →")
     pionJ=input("Le programme joue avec des X \nAvec quoi voulez vous jouer ? ")
@@ -400,6 +400,7 @@ def MorpionGame():
             t1=time.time()
             action=MinMax(Grid,["X",pionJ])
             dt=time.time()-t1
+            listeT.append(dt)
             print("L'IA adverse a réflechie "+CYEL+str(round(dt,1))+CEND+" sc et joue en "+CYEL+str(action[1]+1)+CEND)
             Grid[action[0],action[1]]="X"
             affichage(Grid) 
@@ -407,7 +408,8 @@ def MorpionGame():
         
         term=TerminalUtility(Grid,["X",pionJ])
     print("La partie est finie !")
-    
+    Tmoy=round(np.array(listeT).mean(),4)
+    print("L'IA a prie en moyenne ",Tmoy,"sc à répondre")
 
 
     
