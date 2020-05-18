@@ -324,14 +324,9 @@ def MorpionGame():
          
         else:
             print("Le programme reflechi... :")
-            if(nbCoup==0):
-                t1=time.time()
-                action=[5,4]
-                dt=time.time()-t1
-            else:
-                t1=time.time()
-                action=MinMax(Grid)
-                dt=time.time()-t1
+            t1=time.time()
+            action=MinMax(Grid)
+            dt=time.time()-t1
                 
             listeT.append(dt)
             nbCoup+=1
@@ -345,7 +340,7 @@ def MorpionGame():
         
     print("La partie est finie !")
     Tmoy=round(np.array(listeT).mean(),4)
-    print("L'IA a prie en moyenne ",Tmoy,"sc à répondre")
+    print("Notre IA a prie en moyenne ",Tmoy,"sc à répondre")
     
     
     res=TerminalUtility(Grid)[1]
