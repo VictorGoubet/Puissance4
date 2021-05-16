@@ -24,4 +24,6 @@ You will have to choose the first player (you or the AI).   The AI have the **X*
 
 *example of game*
 
+![Image of a Puissance4 game](https://github.com/[VictorGoubet]/[Puissance4]/blob/[master]/game_example.jpg?raw=true)
+
 That's all, let's play!
